@@ -1,8 +1,9 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,14 +11,14 @@ namespace Aula3
 {
     internal class Conexao
     {
-        static private string servidor = "";
+        static private string servidor = "localhost";
         static private string banco = "bd_aula3";
         static private string usuario = "root";
         static private string senha = "cursoads";
 
         static public string strConn = $"server={servidor};" +
-        $"database={banco}; User Id={usuario};" +
-        $"password={senha}";
+            $"database={banco}; User Id={usuario};" +
+            $"password={senha}";
 
         MySqlConnection cn;
 
@@ -26,7 +27,7 @@ namespace Aula3
             bool result;
             try
             {
-                cn= new MySqlConnection(strConn);
+                cn = new MySqlConnection(strConn);
                 cn.Open();
                 result = true;
             }
@@ -36,16 +37,17 @@ namespace Aula3
             }
             return result;
         }
-        private void Desconecar()
+
+        private void Desconectar()
         {
-            if(cn.State == System.Data.ConnectionState.Open)
+            if (cn.State == System.Data.ConnectionState.Open)
             {
                 cn.Close();
             }
         }
-        public bool Executar(String sql)
+        public bool Executar(string sql)
         {
-            bool resultado;
+            bool resultado = false;
             if (Conectar())
             {
                 try
@@ -62,7 +64,30 @@ namespace Aula3
                 {
                     Desconectar();
                 }
-                return resultado;
+
+
+            }
+            return resultado;
+        }
+        public DataTable Retorna(string sql)
+        {
+            Conectar();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(sql, cn);
+                MySqlDataAdapter da = new MySqlDataAdapter();
+                da.SelectCommand = cmd;
+                DataTable data = new DataTable();
+                da.Fill(data);
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                Desconectar();
             }
         }
     }
